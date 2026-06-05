@@ -1,0 +1,9 @@
+requirements.txt
+
+frontend/
+├── Dockerfile
+├── requirements.txt
+└── src/
+    ├── app.py
+    ├── static/
+    └── templates/
