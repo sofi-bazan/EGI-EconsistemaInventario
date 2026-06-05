@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Nuevo Equipo — ITU{% endblock %}
+{% block page_title %}Registrar Nuevo Equipo{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('nuevo_equipo') }}">
+<div class="row g-4">
+    <!-- Datos de Ubicación (van a MySQL) -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-geo-alt me-2 text-primary"></i>Ubicación y Asignación
+                <span class="badge bg-info text-dark ms-2" style="font-size:.72rem;">→ MySQL</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">N° de Serie <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="numero_serie"
+                           placeholder="Ej: SN-2024-001" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tipo de equipo <span class="text-danger">*</span></label>
+                    <select class="form-select" name="tipo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="desktop">Desktop</option>
+                        <option value="laptop">Laptop</option>
+                        <option value="servidor">Servidor</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Aula / Laboratorio <span class="text-danger">*</span></label>
+                    <select class="form-select" name="aula_id" required>
+                        <option value="">Seleccionar...</option>
+                        {% for aula in aulas %}
+                        <option value="{{ aula.id }}">{{ aula.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">N° Banco / Mesa <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" name="numero_banco" min="1" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Responsable <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="responsable"
+                           placeholder="Ej: Lic. María López" required>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datos de Hardware (van a MongoDB) -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-cpu me-2 text-warning"></i>Componentes de Hardware
+                <span class="badge bg-success ms-2" style="font-size:.72rem;">→ MongoDB</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="form-label">Fabricante</label>
+                        <input type="text" class="form-control" name="fabricante" placeholder="Ej: Lenovo">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Modelo</label>
+                        <input type="text" class="form-control" name="modelo" placeholder="Ej: ThinkCentre M75q">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Procesador (CPU)</label>
+                    <input type="text" class="form-control" name="cpu"
+                           placeholder="Ej: Intel Core i5-12400 @ 2.5GHz">
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-4">
+                        <label class="form-label">RAM (GB)</label>
+                        <input type="number" class="form-control" name="ram_gb" value="8" min="1">
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Disco (GB)</label>
+                        <input type="number" class="form-control" name="disco_gb" value="512" min="1">
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Tipo disco</label>
+                        <select class="form-select" name="disco_tipo">
+                            <option value="ssd">SSD</option>
+                            <option value="hdd">HDD</option>
+                            <option value="nvme">NVMe</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Sistema Operativo</label>
+                    <input type="text" class="form-control" name="so"
+                           placeholder="Ej: Windows 11 Pro 23H2">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Monitor</label>
+                    <input type="text" class="form-control" name="monitor"
+                           placeholder="Ej: Samsung 24&quot; Full HD">
+                </div>
+                <div class="d-flex gap-4 mt-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="mouse" id="mouse" checked>
+                        <label class="form-check-label" for="mouse">Mouse</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="teclado" id="teclado" checked>
+                        <label class="form-check-label" for="teclado">Teclado</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botones de acción -->
+<div class="d-flex gap-2 mt-3">
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-floppy me-1"></i>Guardar equipo
+    </button>
+    <a href="{{ url_for('inventario') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-x-circle me-1"></i>Cancelar
+    </a>
+</div>
+</form>
+{% endblock %}

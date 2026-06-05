@@ -1,0 +1,137 @@
+/* =========================================================
+   Inventario ITU — Estilos globales
+   Paleta institucional definida como variables CSS para
+   poder cambiar colores en un solo lugar si hace falta.
+   ========================================================= */
+
+:root {
+    --itu-primary: #1a3a5c;   /* azul marino institucional */
+    --itu-accent:  #2e8bc0;   /* azul claro para botones y acentos */
+    --itu-light:   #e8f4fd;   /* fondo suave para badges y highlights */
+}
+
+/* ----- Layout general ----- */
+body {
+    background: #f4f6f9;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* ----- Sidebar de navegación ----- */
+.sidebar {
+    background: var(--itu-primary);
+    min-height: 100vh;
+    padding-top: 1rem;
+}
+
+.sidebar .nav-link {
+    color: #cce0f5;
+    padding: .6rem 1.2rem;
+    border-radius: 6px;
+    margin: 2px 8px;
+    transition: background .15s ease;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background: var(--itu-accent);
+    color: #fff;
+}
+
+.sidebar .nav-link i {
+    margin-right: 8px;
+}
+
+/* ----- Zona de contenido principal ----- */
+.main-content {
+    padding: 1.5rem 2rem;
+}
+
+/* ----- Tarjetas de estadísticas (dashboard) ----- */
+.card-stat {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
+}
+
+.card-stat .icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* ----- Badge de aula / laboratorio ----- */
+.badge-aula {
+    background: var(--itu-light);
+    color: var(--itu-primary);
+    font-weight: 600;
+}
+
+/* ----- Tabla ----- */
+table thead {
+    background: var(--itu-primary);
+    color: #fff;
+}
+
+/* ----- Botones — sobreescribimos el azul de Bootstrap
+         para que use el color institucional en lugar del
+         azul por defecto de Bootstrap                  ----- */
+.btn-primary {
+    background: var(--itu-accent);
+    border-color: var(--itu-accent);
+}
+
+.btn-primary:hover {
+    background: var(--itu-primary);
+    border-color: var(--itu-primary);
+}
+
+/* ----- Número de serie en tabla (antes era <code> inline) ----- */
+.badge-serie {
+    font-size: .82rem;
+    background: #f0f4fa;
+    color: #333;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+/* ----- Footer ----- */
+footer {
+    background: var(--itu-primary);
+    color: #9ab4cc;
+    font-size: .8rem;
+    padding: .8rem 1.5rem;
+}
+
+/* =========================================================
+   RESPONSIVE — ajustes para pantallas chicas
+   @media es una condición que dice "aplicá estos estilos
+   SOLO cuando el ancho de pantalla sea menor a 768px".
+   Los estilos de arriba siguen aplicando en desktop.
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    /* Menos padding lateral en mobile para aprovechar el espacio */
+    .main-content {
+        padding: 1rem;
+    }
+
+    /* En mobile las tarjetas de stats del dashboard
+       ocupan la mitad del ancho cada una (2 por fila) */
+    .card-stat {
+        min-width: 0;
+    }
+
+    /* El footer se centra en mobile en lugar de quedar
+       en dos columnas que se aprietan */
+    footer {
+        justify-content: center !important;
+        text-align: center;
+        font-size: .75rem;
+    }
+}

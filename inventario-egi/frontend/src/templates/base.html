@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Inventario ITU{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="d-flex">
+
+    <!-- =====================================================
+         SIDEBAR DESKTOP
+         d-none d-md-flex = invisible en mobile, visible
+         a partir de pantallas medianas (768px+).
+         En desktop ocupa 230px fijos al costado izquierdo.
+    ====================================================== -->
+    <nav class="sidebar d-none d-md-flex flex-column" style="width:230px; flex-shrink:0; min-height:100vh;">
+        <div class="text-center py-3 px-2 mb-2">
+            <i class="bi bi-pc-display-horizontal" style="font-size:2.5rem; color:var(--itu-accent)"></i>
+            <div class="text-white fw-bold mt-1" style="font-size:.95rem">Inventario ITU</div>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"
+                   href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'inventario' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('inventario') }}">
+                    <i class="bi bi-list-ul"></i> Inventario
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('nuevo_equipo') }}">
+                    <i class="bi bi-plus-circle"></i> Nuevo Equipo
+                </a>
+            </li>
+        </ul>
+        <div class="mt-auto p-3 text-center" style="font-size:.78rem; color:#7aa4c2;">
+            <i class="bi bi-person-circle me-1"></i>{{ session.username }}
+            <a href="{{ url_for('logout') }}" class="d-block text-danger mt-1">
+                <i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión
+            </a>
+        </div>
+    </nav>
+
+    <!-- =====================================================
+         SIDEBAR MOBILE (Offcanvas)
+         El mismo menú pero en versión deslizable.
+         Se activa con el botón hamburguesa de la topbar.
+         data-bs-target apunta al id del offcanvas de abajo.
+    ====================================================== -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMobile"
+         style="width:230px; background:var(--itu-primary);">
+        <div class="offcanvas-header border-0">
+            <div class="text-center w-100 pt-2">
+                <i class="bi bi-pc-display-horizontal" style="font-size:2rem; color:var(--itu-accent)"></i>
+                <div class="text-white fw-bold" style="font-size:.95rem">Inventario ITU</div>
+            </div>
+            <!-- Botón X para cerrar el offcanvas -->
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"
+                       href="{{ url_for('dashboard') }}" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'inventario' in request.endpoint %}active{% endif %}"
+                       href="{{ url_for('inventario') }}" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-list-ul"></i> Inventario
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('nuevo_equipo') }}" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-plus-circle"></i> Nuevo Equipo
+                    </a>
+                </li>
+            </ul>
+            <div class="p-3 text-center mt-3" style="font-size:.78rem; color:#7aa4c2;">
+                <i class="bi bi-person-circle me-1"></i>{{ session.username }}
+                <a href="{{ url_for('logout') }}" class="d-block text-danger mt-1">
+                    <i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna derecha: topbar + contenido + footer -->
+    <div class="flex-grow-1 d-flex flex-column" style="min-width:0;">
+
+        <!-- Topbar -->
+        <div class="d-flex align-items-center px-3 py-2 bg-white shadow-sm">
+
+            <!-- Botón hamburguesa: solo visible en mobile (d-md-none) -->
+            <button class="btn btn-sm btn-outline-secondary me-2 d-md-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#sidebarMobile">
+                <i class="bi bi-list fs-5"></i>
+            </button>
+
+            <h5 class="mb-0 text-secondary fw-semibold text-truncate">
+                {% block page_title %}Panel{% endblock %}
+            </h5>
+
+            <!-- El nombre de usuario se oculta en mobile para no apretar la topbar -->
+            <span class="ms-auto text-muted d-none d-sm-inline" style="font-size:.82rem; white-space:nowrap;">
+                <i class="bi bi-shield-check text-success me-1"></i>
+                <strong>{{ session.username }}</strong>
+            </span>
+        </div>
+
+        <!-- Mensajes flash -->
+        <div class="px-3 pt-2">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Contenido principal de cada página -->
+        <div class="main-content flex-grow-1">
+            {% block content %}{% endblock %}
+        </div>
+
+        <footer class="d-flex justify-content-between flex-wrap gap-1">
+            <span>Proyecto Integrador EGI — ITU &copy; 2025</span>
+            <span>v1.0.0 &nbsp;|&nbsp; <i class="bi bi-github"></i> inventario-egi</span>
+        </footer>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Inventario — ITU{% endblock %}
+{% block page_title %}Inventario de Equipos{% endblock %}
+
+{% block content %}
+
+<!-- Filtros de búsqueda -->
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('inventario') }}" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label mb-1 text-muted" style="font-size:.82rem">Aula / Laboratorio</label>
+                <input type="text" class="form-control form-control-sm" name="aula"
+                       value="{{ aula_filtro }}" placeholder="Ej: Lab 3">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label mb-1 text-muted" style="font-size:.82rem">Responsable</label>
+                <input type="text" class="form-control form-control-sm" name="responsable"
+                       value="{{ responsable_filtro }}" placeholder="Ej: García">
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+                <a href="{{ url_for('inventario') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-circle me-1"></i>Limpiar
+                </a>
+                <a href="{{ url_for('nuevo_equipo') }}" class="btn btn-success btn-sm ms-auto">
+                    <i class="bi bi-plus-circle me-1"></i>Nuevo
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de equipos -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        {% if equipos %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-3">#</th>
+                        <th>N° Serie</th>
+                        <th>Tipo</th>
+                        <th>Aula</th>
+                        <th>Banco</th>
+                        <th>Responsable</th>
+                        <th>Próx. Mantenimiento</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for equipo in equipos %}
+                    <tr>
+                        <td class="ps-3 text-muted" style="font-size:.8rem">{{ equipo.id }}</td>
+                        <td>
+                            <!-- badge-serie reemplaza al <code> inline que teníamos antes -->
+                            <span class="badge-serie">{{ equipo.numero_serie }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">
+                                {% if equipo.tipo == 'laptop' %}
+                                    <i class="bi bi-laptop me-1"></i>
+                                {% else %}
+                                    <i class="bi bi-pc-display me-1"></i>
+                                {% endif %}
+                                {{ equipo.tipo | capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-aula px-2 py-1">
+                                <i class="bi bi-building me-1"></i>{{ equipo.aula }}
+                            </span>
+                        </td>
+                        <td class="text-center">{{ equipo.numero_banco }}</td>
+                        <td>{{ equipo.responsable }}</td>
+                        <td>
+                            <span class="text-warning fw-semibold">
+                                <i class="bi bi-calendar2-check me-1"></i>
+                                {{ equipo.proximo_mantenimiento }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('detalle_equipo', equipo_id=equipo.id) }}"
+                               class="btn btn-sm btn-outline-primary me-1" title="Ver detalle">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <!-- data-confirm: el mensaje de confirmación lo lee main.js -->
+                            <form method="POST"
+                                  action="{{ url_for('eliminar_equipo', equipo_id=equipo.id) }}"
+                                  class="d-inline"
+                                  data-confirm="¿Eliminar el equipo {{ equipo.numero_serie }}?">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="px-3 py-2 text-muted" style="font-size:.82rem; border-top:1px solid #eee;">
+            {{ equipos | length }} equipo(s) encontrado(s)
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox" style="font-size:3rem; opacity:.3;"></i>
+            <p class="mt-2">No se encontraron equipos con esos filtros.</p>
+            <a href="{{ url_for('nuevo_equipo') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>Registrar el primer equipo
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

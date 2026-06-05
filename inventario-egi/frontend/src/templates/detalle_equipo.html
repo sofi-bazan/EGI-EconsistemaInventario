@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Detalle: {{ equipo.numero_serie }} — ITU{% endblock %}
+{% block page_title %}Detalle del Equipo{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+    <!-- Columna izquierda: datos de ubicación y asignación (vienen de MySQL) -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white d-flex align-items-center">
+                <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                <span class="fw-semibold">Ubicación y Asignación</span>
+                <span class="badge bg-info text-dark ms-auto" style="font-size:.72rem;">MySQL</span>
+            </div>
+            <div class="card-body">
+                {% if equipo %}
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td class="text-muted" style="width:45%">N° de Serie</td>
+                        <!-- badge-serie en lugar de <code> -->
+                        <td><span class="badge-serie">{{ equipo.numero_serie }}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Tipo</td>
+                        <td>
+                            {% if equipo.tipo == 'laptop' %}
+                                <i class="bi bi-laptop me-1 text-secondary"></i>
+                            {% else %}
+                                <i class="bi bi-pc-display me-1 text-secondary"></i>
+                            {% endif %}
+                            {{ equipo.tipo | capitalize }}
+                        </td>
+                    </tr>
+                    <tr><td class="text-muted">Edificio</td><td>{{ equipo.edificio }}</td></tr>
+                    <tr><td class="text-muted">Piso</td><td>{{ equipo.piso }}</td></tr>
+                    <tr>
+                        <td class="text-muted">Aula / Lab</td>
+                        <td><span class="badge badge-aula">{{ equipo.aula }}</span></td>
+                    </tr>
+                    <tr><td class="text-muted">N° Banco/Mesa</td><td><strong>{{ equipo.numero_banco }}</strong></td></tr>
+                    <tr>
+                        <td class="text-muted">Responsable</td>
+                        <td><i class="bi bi-person-circle me-1 text-secondary"></i>{{ equipo.responsable }}</td>
+                    </tr>
+                    <tr><td class="text-muted">Alta en sistema</td><td>{{ equipo.fecha_alta }}</td></tr>
+                    <tr>
+                        <td class="text-muted">Próx. Mantenimiento</td>
+                        <td>
+                            <span class="text-warning fw-semibold">
+                                <i class="bi bi-tools me-1"></i>{{ equipo.proximo_mantenimiento }}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+                {% else %}
+                <p class="text-muted text-center py-4">Sin datos de ubicación.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna derecha: componentes de hardware (vienen de MongoDB) -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white d-flex align-items-center">
+                <i class="bi bi-cpu-fill text-warning me-2"></i>
+                <span class="fw-semibold">Componentes de Hardware</span>
+                <span class="badge bg-success ms-auto" style="font-size:.72rem;">MongoDB</span>
+            </div>
+            <div class="card-body">
+                {% if hardware %}
+                <table class="table table-sm table-borderless">
+                    <tr><td class="text-muted" style="width:45%">Fabricante</td><td>{{ hardware.fabricante }}</td></tr>
+                    <tr><td class="text-muted">Modelo</td><td>{{ hardware.modelo }}</td></tr>
+                    <tr>
+                        <td class="text-muted">CPU</td>
+                        <td><i class="bi bi-cpu me-1 text-secondary"></i>{{ hardware.cpu }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">RAM</td>
+                        <td><i class="bi bi-memory me-1 text-secondary"></i>{{ hardware.ram_gb }} GB</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Almacenamiento</td>
+                        <td>
+                            <i class="bi bi-device-hdd me-1 text-secondary"></i>
+                            {{ hardware.disco_gb }} GB ({{ hardware.disco_tipo | upper }})
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Sistema Operativo</td>
+                        <td><i class="bi bi-windows me-1 text-secondary"></i>{{ hardware.so }}</td>
+                    </tr>
+                    <tr><td class="text-muted">Monitor</td><td>{{ hardware.get('monitor', 'N/D') }}</td></tr>
+                    <tr>
+                        <td class="text-muted">Mouse</td>
+                        <td>
+                            {% if hardware.mouse %}
+                                <span class="text-success"><i class="bi bi-check-circle-fill"></i> Sí</span>
+                            {% else %}
+                                <span class="text-danger"><i class="bi bi-x-circle-fill"></i> No</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Teclado</td>
+                        <td>
+                            {% if hardware.teclado %}
+                                <span class="text-success"><i class="bi bi-check-circle-fill"></i> Sí</span>
+                            {% else %}
+                                <span class="text-danger"><i class="bi bi-x-circle-fill"></i> No</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-database-x" style="font-size:2rem; opacity:.3;"></i>
+                    <p class="mt-2" style="font-size:.9rem;">Sin datos de hardware en MongoDB.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barra de acciones -->
+<div class="d-flex gap-2 mt-3">
+    <a href="{{ url_for('inventario') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Volver al inventario
+    </a>
+    {% if equipo %}
+    <!-- data-confirm: el JS en main.js lee este atributo para mostrar el confirm() -->
+    <form method="POST"
+          action="{{ url_for('eliminar_equipo', equipo_id=equipo.id) }}"
+          class="d-inline"
+          data-confirm="¿Eliminar este equipo permanentemente?">
+        <button type="submit" class="btn btn-danger btn-sm">
+            <i class="bi bi-trash me-1"></i>Eliminar
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+{% endblock %}
