@@ -1,8 +1,6 @@
 /* =========================================================
    Inventario ITU — JavaScript global
-   Este archivo se carga en todas las páginas a través de
-   base.html. Cada sección está comentada para que sea fácil
-   encontrar qué hace cada parte.
+   Este archivo se carga en todas las páginas a través de base.html.
    ========================================================= */
 
 document.addEventListener('DOMContentLoaded', function () {
