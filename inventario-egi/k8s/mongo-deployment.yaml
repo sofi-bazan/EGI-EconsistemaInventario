@@ -1,0 +1,42 @@
+# =============================================================
+# mongo-deployment.yaml
+# Deployment: el pod de MongoDB.
+# Usa la imagen oficial de mongo y monta el PVC para persistir datos.
+# Proyecto Integrador EGI - ITU
+# =============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+  namespace: inventario
+  labels:
+    app: mongo                # etiqueta que usa el Service y las NetworkPolicies
+spec:
+  replicas: 1                 # una sola instancia de Mongo
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo            # los pods llevan esta etiqueta (clave para el Service y las policies)
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7.0    # imagen oficial de MongoDB
+          ports:
+            - containerPort: 27017   # puerto estandar de Mongo
+          volumeMounts:
+            - name: mongo-storage
+              mountPath: /data/db     # carpeta donde Mongo guarda los datos
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      volumes:
+        - name: mongo-storage
+          persistentVolumeClaim:
+            claimName: mongo-pvc        # conecta con el PVC definido en mongo-pvc.yaml
