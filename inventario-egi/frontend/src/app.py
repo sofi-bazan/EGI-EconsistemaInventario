@@ -1,14 +1,11 @@
 # =========================================================
-# Inventario ITU - app.py (versión REAL con conexiones)
+# Inventario ITU - app.py
 #
 # Se conecta a:
 #   - SQL Server (ubicación de equipos)  -> pymssql
 #   - MongoDB    (hardware de equipos)   -> pymongo
 #   - LDAP / AD  (autenticación)         -> ldap3
 #
-# TODA la configuración (hosts, puertos, usuarios, claves)
-# se lee de VARIABLES DE ENTORNO. Nada hardcodeado.
-# En Kubernetes esas variables vienen de ConfigMaps y Secrets.
 # =========================================================
 
 import os
@@ -21,13 +18,11 @@ from ldap3 import Server, Connection, ALL
 
 app = Flask(__name__)
 
-# La secret_key se lee de variable de entorno (NO hardcodeada).
-# Si no existe, usa un valor de respaldo solo para desarrollo.
+# Secret_key = variable de entorno
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-only-change-me')
 
 # ---------------------------------------------------------
-# CONFIGURACIÓN (toda desde variables de entorno)
-# Los nombres por defecto apuntan a los Services de Kubernetes.
+# CONFIGURACIÓN (variables de entorno)
 # ---------------------------------------------------------
 # SQL Server
 SQL_HOST = os.environ.get('SQL_HOST', 'ubicacion-db')

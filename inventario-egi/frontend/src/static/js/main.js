@@ -5,10 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    /* ----- Confirmación antes de eliminar un equipo -----
-       Los botones de eliminar tienen el atributo
-       data-confirm con el mensaje a mostrar.
-       Si el usuario cancela, se detiene el envío del form. */
+    /* ----- Confirmación antes de eliminar un equipo ----- */
     document.querySelectorAll('form[data-confirm]').forEach(function (form) {
         form.addEventListener('submit', function (e) {
             var mensaje = form.getAttribute('data-confirm');
@@ -18,9 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    /* ----- Auto-cerrar alertas flash después de 4 segundos -----
-       Las alertas de éxito/error que Flask manda con flash()
-       desaparecen solas para no molestar al usuario. */
+    /* ----- Auto-cerrar alertas flash después de 4 segundos ----- */
     document.querySelectorAll('.alert').forEach(function (alerta) {
         setTimeout(function () {
             // Bootstrap tiene su propio método para cerrar alertas
@@ -29,9 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 4000);
     });
 
-    /* ----- Marcar fila activa en la tabla de inventario -----
-       Cuando el usuario hace click en una fila de la tabla,
-       la resalta visualmente para indicar selección. */
+    /* ----- Marcar fila activa en la tabla de inventario ----- */
     document.querySelectorAll('table tbody tr').forEach(function (fila) {
         fila.style.cursor = 'pointer';
         fila.addEventListener('click', function (e) {
