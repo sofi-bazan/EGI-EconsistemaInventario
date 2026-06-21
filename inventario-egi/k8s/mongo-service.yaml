@@ -1,0 +1,19 @@
+# =============================================================
+# mongo-service.yaml
+# Service: expone MongoDB dentro del cluster con un nombre estable.
+# Flask se conecta a "inventario-db:27017" y Kubernetes resuelve el DNS
+# interno hacia el pod de Mongo. No se expone al exterior (ClusterIP).
+# =============================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventario-db        # nombre por el que Flask encuentra a Mongo
+  namespace: inventario
+spec:
+  type: ClusterIP            # solo accesible dentro del cluster (no al exterior)
+  selector:
+    app: mongo               # apunta a los pods con la etiqueta app=mongo
+  ports:
+    - protocol: TCP
+      port: 27017            # puerto del Service
+      targetPort: 27017      # puerto del contenedor de Mongo

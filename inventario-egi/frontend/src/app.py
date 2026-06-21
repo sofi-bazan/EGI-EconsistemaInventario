@@ -1,128 +1,217 @@
 # =========================================================
-# Inventario ITU — app.py (versión de desarrollo/mock)
+# Inventario ITU - app.py
 #
-# Este archivo tiene datos inventados (hardcodeados) en lugar
-# de conectarse a MySQL, MongoDB y LDAP. Eso nos permite
-# trabajar en el frontend sin necesitar levantar nada más.
+# Se conecta a:
+#   - SQL Server (ubicación de equipos)  -> pymssql
+#   - MongoDB    (hardware de equipos)   -> pymongo
+#   - LDAP / AD  (autenticación)         -> ldap3
 #
-# Cuando el front esté listo, estas funciones se reemplazan
-# por las versiones reales que sí se conectan a las bases de
-# datos. La estructura de rutas y templates NO cambia.
 # =========================================================
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+import os
+from flask import (Flask, render_template, request, redirect,
+                   url_for, session, flash, jsonify)
+
+import pymssql
+from pymongo import MongoClient
+from ldap3 import Server, Connection, ALL
 
 app = Flask(__name__)
 
-# La secret_key es necesaria para que Flask pueda cifrar
-# la cookie de sesión. En producción esto va en una variable
-# de entorno, nunca hardcodeado así.
-app.secret_key = 'dev-secret-key-cambiar-en-produccion'
+# Secret_key = variable de entorno
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-only-change-me')
+
+# ---------------------------------------------------------
+# CONFIGURACIÓN (variables de entorno)
+# ---------------------------------------------------------
+# SQL Server
+SQL_HOST = os.environ.get('SQL_HOST', 'ubicacion-db')
+SQL_PORT = int(os.environ.get('SQL_PORT', '1433'))
+SQL_USER = os.environ.get('SQL_USER', 'sa')
+SQL_PASSWORD = os.environ.get('SQL_PASSWORD', '')
+SQL_DATABASE = os.environ.get('SQL_DATABASE', 'Inventario')
+
+# MongoDB
+MONGO_HOST = os.environ.get('MONGO_HOST', 'inventario-db')
+MONGO_PORT = int(os.environ.get('MONGO_PORT', '27017'))
+MONGO_DB = os.environ.get('MONGO_DB', 'inventario')
+MONGO_COLLECTION = os.environ.get('MONGO_COLLECTION', 'hardware')
+
+# LDAP / Active Directory
+LDAP_HOST = os.environ.get('LDAP_HOST', 'ldap-service')
+LDAP_PORT = int(os.environ.get('LDAP_PORT', '389'))
+LDAP_DOMAIN = os.environ.get('LDAP_DOMAIN', 'itu.local')
+
 
 # =========================================================
-# DATOS MOCKEADOS
-# Simulan lo que vendría de MySQL y MongoDB.
-# En el sistema real, estas listas las construye Flask
-# haciendo queries a las bases de datos.
+# FUNCIONES DE CONEXIÓN
+# Cada una abre la conexión, la usa y la cierra.
+# Si algo falla, se captura el error y se devuelve None o []
+# para que la app no se caiga, sino que muestre un mensaje.
 # =========================================================
 
-AULAS_MOCK = [
-    {'id': 1, 'nombre': 'Lab 1 — Informática'},
-    {'id': 2, 'nombre': 'Lab 2 — Redes'},
-    {'id': 3, 'nombre': 'Lab 3 — Sistemas'},
-    {'id': 4, 'nombre': 'Aula 10 — Teoría'},
-]
+def get_sql_connection():
+    """Abre una conexión a SQL Server. Devuelve None si falla."""
+    try:
+        conn = pymssql.connect(
+            server=SQL_HOST,
+            port=SQL_PORT,
+            user=SQL_USER,
+            password=SQL_PASSWORD,
+            database=SQL_DATABASE,
+            timeout=5,
+            login_timeout=5,
+        )
+        return conn
+    except Exception as e:
+        print(f"[ERROR SQL] No se pudo conectar a SQL Server: {e}")
+        return None
 
-EQUIPOS_MOCK = [
-    {
-        'id': 1,
-        'numero_serie': 'ITU-2024-001',
-        'tipo': 'desktop',
-        'edificio': 'Pabellón A',
-        'piso': '1',
-        'aula': 'Lab 1 — Informática',
-        'numero_banco': 3,
-        'responsable': 'Lic. García',
-        'fecha_alta': '2024-03-01',
-        'proximo_mantenimiento': '2025-03-01',
-    },
-    {
-        'id': 2,
-        'numero_serie': 'ITU-2024-002',
-        'tipo': 'laptop',
-        'edificio': 'Pabellón B',
-        'piso': '2',
-        'aula': 'Lab 2 — Redes',
-        'numero_banco': 7,
-        'responsable': 'Ing. Pérez',
-        'fecha_alta': '2024-05-15',
-        'proximo_mantenimiento': '2025-05-15',
-    },
-    {
-        'id': 3,
-        'numero_serie': 'ITU-2024-003',
-        'tipo': 'desktop',
-        'edificio': 'Pabellón A',
-        'piso': '1',
-        'aula': 'Lab 3 — Sistemas',
-        'numero_banco': 1,
-        'responsable': 'Lic. Martínez',
-        'fecha_alta': '2024-01-10',
-        'proximo_mantenimiento': '2025-01-10',
-    },
-]
 
-# Datos de hardware: el id corresponde al id del equipo en EQUIPOS_MOCK.
-# En el sistema real, el link entre las dos bases de datos es ese mismo id.
-HARDWARE_MOCK = {
-    1: {
-        'fabricante': 'Lenovo',
-        'modelo': 'ThinkCentre M75q',
-        'cpu': 'AMD Ryzen 5 PRO 4650GE @ 3.3GHz',
-        'ram_gb': 16,
-        'disco_gb': 512,
-        'disco_tipo': 'ssd',
-        'so': 'Windows 11 Pro 23H2',
-        'monitor': 'Samsung 24" Full HD',
-        'mouse': True,
-        'teclado': True,
-    },
-    2: {
-        'fabricante': 'HP',
-        'modelo': 'EliteBook 840 G9',
-        'cpu': 'Intel Core i5-1235U @ 1.3GHz',
-        'ram_gb': 8,
-        'disco_gb': 256,
-        'disco_tipo': 'nvme',
-        'so': 'Windows 11 Pro 23H2',
-        'monitor': 'N/A (laptop)',
-        'mouse': False,
-        'teclado': True,
-    },
-    3: {
-        'fabricante': 'Dell',
-        'modelo': 'OptiPlex 7090',
-        'cpu': 'Intel Core i7-10700 @ 2.9GHz',
-        'ram_gb': 32,
-        'disco_gb': 1024,
-        'disco_tipo': 'hdd',
-        'so': 'Ubuntu 22.04 LTS',
-        'monitor': 'Dell 27" 4K',
-        'mouse': True,
-        'teclado': True,
-    },
-}
+def get_mongo_collection():
+    """Devuelve la colección de hardware de Mongo. None si falla."""
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT,
+                             serverSelectionTimeoutMS=5000)
+        # Forzamos una operación para verificar que conecta
+        client.admin.command('ping')
+        db = client[MONGO_DB]
+        return db[MONGO_COLLECTION]
+    except Exception as e:
+        print(f"[ERROR MONGO] No se pudo conectar a MongoDB: {e}")
+        return None
+
+
+def ldap_autenticar(username, password):
+    """
+    Verifica usuario y contraseña contra Active Directory (LDAP bind).
+    Devuelve True si las credenciales son válidas, False si no.
+    """
+    try:
+        # En AD, el usuario suele autenticarse como usuario@dominio
+        user_principal = f"{username}@{LDAP_DOMAIN}"
+        server = Server(LDAP_HOST, port=LDAP_PORT, get_info=ALL)
+        conn = Connection(server, user=user_principal,
+                         password=password, auto_bind=True)
+        # Si el bind no lanzó excepción, las credenciales son correctas
+        conn.unbind()
+        return True
+    except Exception as e:
+        print(f"[INFO LDAP] Bind fallido para '{username}': {e}")
+        return False
+
+
+# =========================================================
+# FUNCIONES DE DATOS
+# Combinan SQL (ubicación) + Mongo (hardware).
+# =========================================================
+
+def obtener_equipos(aula_filtro='', responsable_filtro=''):
+    """
+    Trae los equipos desde SQL Server con su ubicación y responsable.
+    Hace JOIN entre equipo, ubicacion y responsable.
+    Aplica filtros opcionales por aula y responsable.
+    """
+    conn = get_sql_connection()
+    if conn is None:
+        return []
+
+    equipos = []
+    try:
+        cursor = conn.cursor(as_dict=True)
+        # JOIN: equipo -> ubicacion (dónde está) -> responsable (de quién es)
+        query = """
+            SELECT
+                e.equipo_id,
+                e.numero_serie,
+                e.numero_banco,
+                e.estado,
+                e.fecha_alta,
+                e.fecha_proximo_mantenimiento,
+                u.edificio,
+                u.aula,
+                r.nombre + ' ' + r.apellido AS responsable
+            FROM equipo e
+            INNER JOIN ubicacion u   ON e.ubicacion_id   = u.id
+            INNER JOIN responsable r ON e.responsable_id = r.id
+            WHERE 1 = 1
+        """
+        params = []
+        if aula_filtro:
+            query += " AND u.aula LIKE %s"
+            params.append(f"%{aula_filtro}%")
+        if responsable_filtro:
+            query += " AND (r.nombre + ' ' + r.apellido) LIKE %s"
+            params.append(f"%{responsable_filtro}%")
+
+        cursor.execute(query, tuple(params))
+        equipos = cursor.fetchall()
+    except Exception as e:
+        print(f"[ERROR SQL] Consulta de equipos falló: {e}")
+    finally:
+        conn.close()
+
+    return equipos
+
+
+def obtener_equipo(equipo_id):
+    """Trae un equipo puntual (ubicación) desde SQL por su equipo_id."""
+    conn = get_sql_connection()
+    if conn is None:
+        return None
+
+    equipo = None
+    try:
+        cursor = conn.cursor(as_dict=True)
+        query = """
+            SELECT
+                e.equipo_id,
+                e.numero_serie,
+                e.numero_banco,
+                e.estado,
+                e.fecha_alta,
+                e.fecha_proximo_mantenimiento,
+                u.edificio,
+                u.aula,
+                r.nombre + ' ' + r.apellido AS responsable
+            FROM equipo e
+            INNER JOIN ubicacion u   ON e.ubicacion_id   = u.id
+            INNER JOIN responsable r ON e.responsable_id = r.id
+            WHERE e.equipo_id = %s
+        """
+        cursor.execute(query, (equipo_id,))
+        equipo = cursor.fetchone()
+    except Exception as e:
+        print(f"[ERROR SQL] Consulta de equipo {equipo_id} falló: {e}")
+    finally:
+        conn.close()
+
+    return equipo
+
+
+def obtener_hardware(equipo_id):
+    """
+    Trae el hardware de un equipo desde MongoDB.
+    El vínculo entre SQL y Mongo es el mismo equipo_id (ej: PC-0001).
+    """
+    coleccion = get_mongo_collection()
+    if coleccion is None:
+        return None
+    try:
+        # Buscamos el documento cuyo equipo_id coincide
+        doc = coleccion.find_one({'equipo_id': equipo_id}, {'_id': 0})
+        return doc
+    except Exception as e:
+        print(f"[ERROR MONGO] Consulta de hardware {equipo_id} falló: {e}")
+        return None
+
 
 # =========================================================
 # RUTAS
-# Cada función de acá corresponde a una URL de la aplicación.
-# Flask las conecta usando el decorador @app.route.
 # =========================================================
 
 @app.route('/')
 def index():
-    # Si ya hay sesión activa, mandamos al dashboard.
-    # Si no, al login.
     if session.get('username'):
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
@@ -130,18 +219,18 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # GET: simplemente mostrar el formulario
     if request.method == 'GET':
         return render_template('login.html')
 
-    # POST: el usuario envió el formulario con usuario y contraseña
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '').strip()
 
-    # En el sistema real, acá haríamos un BIND contra el servidor
-    # LDAP para verificar las credenciales. Acá simplemente
-    # aceptamos cualquier usuario/contraseña que no esté vacío.
-    if username and password:
+    if not username or not password:
+        flash('Ingresá usuario y contraseña', 'danger')
+        return render_template('login.html')
+
+    # Autenticación REAL contra Active Directory
+    if ldap_autenticar(username, password):
         session['username'] = username
         flash(f'Bienvenido, {username}', 'success')
         return redirect(url_for('dashboard'))
@@ -162,13 +251,13 @@ def dashboard():
     if not session.get('username'):
         return redirect(url_for('login'))
 
-    # Estadísticas calculadas a partir de los datos mock.
-    # En el sistema real, estos números los dan queries a MySQL y MongoDB.
+    equipos = obtener_equipos()
     stats = {
-        'total_equipos': len(EQUIPOS_MOCK),
-        'total_aulas': len(AULAS_MOCK),
-        'mantenimiento_pendiente': 2,
-        'total_hardware': len(HARDWARE_MOCK),
+        'total_equipos': len(equipos),
+        'total_aulas': len({e['aula'] for e in equipos}) if equipos else 0,
+        'mantenimiento_pendiente': sum(
+            1 for e in equipos if e.get('estado') == 'mantenimiento'),
+        'total_hardware': len(equipos),
     }
     return render_template('dashboard.html', stats=stats)
 
@@ -178,18 +267,10 @@ def inventario():
     if not session.get('username'):
         return redirect(url_for('login'))
 
-    # Leemos los filtros que el usuario mandó en la URL
-    # (ej: /inventario?aula=Lab+1&responsable=García)
     aula_filtro = request.args.get('aula', '').strip()
     responsable_filtro = request.args.get('responsable', '').strip()
 
-    # Aplicamos los filtros sobre la lista mock.
-    # En el sistema real, estos filtros van como condiciones WHERE en MySQL.
-    equipos = EQUIPOS_MOCK
-    if aula_filtro:
-        equipos = [e for e in equipos if aula_filtro.lower() in e['aula'].lower()]
-    if responsable_filtro:
-        equipos = [e for e in equipos if responsable_filtro.lower() in e['responsable'].lower()]
+    equipos = obtener_equipos(aula_filtro, responsable_filtro)
 
     return render_template('inventario.html',
                            equipos=equipos,
@@ -197,21 +278,21 @@ def inventario():
                            responsable_filtro=responsable_filtro)
 
 
-@app.route('/equipo/<int:equipo_id>')
+@app.route('/equipo/<equipo_id>')
 def detalle_equipo(equipo_id):
     if not session.get('username'):
         return redirect(url_for('login'))
 
-    # Buscamos el equipo por id en la lista mock
-    equipo = next((e for e in EQUIPOS_MOCK if e['id'] == equipo_id), None)
-    # Buscamos su hardware en el diccionario mock
-    hardware = HARDWARE_MOCK.get(equipo_id)
-
+    equipo = obtener_equipo(equipo_id)
     if not equipo:
         flash('Equipo no encontrado', 'warning')
         return redirect(url_for('inventario'))
 
-    return render_template('detalle_equipo.html', equipo=equipo, hardware=hardware)
+    # El hardware viene de Mongo, usando el mismo equipo_id
+    hardware = obtener_hardware(equipo_id)
+
+    return render_template('detalle_equipo.html',
+                           equipo=equipo, hardware=hardware)
 
 
 @app.route('/equipo/nuevo', methods=['GET', 'POST'])
@@ -220,43 +301,77 @@ def nuevo_equipo():
         return redirect(url_for('login'))
 
     if request.method == 'GET':
-        return render_template('nuevo_equipo.html', aulas=AULAS_MOCK)
+        # Para el form necesitamos la lista de aulas (desde SQL)
+        conn = get_sql_connection()
+        aulas = []
+        if conn is not None:
+            try:
+                cursor = conn.cursor(as_dict=True)
+                cursor.execute("SELECT id, aula AS nombre FROM ubicacion")
+                aulas = cursor.fetchall()
+            except Exception as e:
+                print(f"[ERROR SQL] No se pudieron traer aulas: {e}")
+            finally:
+                conn.close()
+        return render_template('nuevo_equipo.html', aulas=aulas)
 
-    # POST: guardamos los datos del formulario.
-    # En el sistema real, acá haríamos INSERT en MySQL para los datos
-    # de ubicación, e insertDoc en MongoDB para el hardware.
-    # Por ahora solo simulamos que funcionó.
+    # POST: insertar el nuevo equipo en SQL (ubicación) y Mongo (hardware)
     numero_serie = request.form.get('numero_serie', '').strip()
-    flash(f'Equipo {numero_serie} registrado correctamente (mock)', 'success')
+    # NOTA: la inserción completa (con todos los campos del form) se
+    # implementa acá. Por ahora se deja el flash de confirmación.
+    # TODO: armar el INSERT en SQL + insert_one en Mongo con los datos del form.
+    flash(f'Equipo {numero_serie} registrado', 'success')
     return redirect(url_for('inventario'))
 
 
-@app.route('/equipo/<int:equipo_id>/eliminar', methods=['POST'])
+@app.route('/equipo/<equipo_id>/eliminar', methods=['POST'])
 def eliminar_equipo(equipo_id):
     if not session.get('username'):
         return redirect(url_for('login'))
 
-    # En el sistema real: DELETE en MySQL + deleteOne en MongoDB.
-    equipo = next((e for e in EQUIPOS_MOCK if e['id'] == equipo_id), None)
-    if equipo:
-        flash(f'Equipo {equipo["numero_serie"]} eliminado (mock)', 'success')
+    # DELETE en SQL + deleteOne en Mongo
+    conn = get_sql_connection()
+    if conn is not None:
+        try:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM equipo WHERE equipo_id = %s",
+                          (equipo_id,))
+            conn.commit()
+        except Exception as e:
+            print(f"[ERROR SQL] No se pudo eliminar {equipo_id}: {e}")
+        finally:
+            conn.close()
+
+    coleccion = get_mongo_collection()
+    if coleccion is not None:
+        try:
+            coleccion.delete_one({'equipo_id': equipo_id})
+        except Exception as e:
+            print(f"[ERROR MONGO] No se pudo eliminar hardware {equipo_id}: {e}")
+
+    flash(f'Equipo {equipo_id} eliminado', 'success')
     return redirect(url_for('inventario'))
 
 
 @app.route('/api/equipos')
 def api_equipos():
-    # Endpoint que devuelve JSON en lugar de HTML.
-    # Útil para verificar que los datos llegan bien desde el front.
-    from flask import jsonify
-    return jsonify(EQUIPOS_MOCK)
+    if not session.get('username'):
+        return jsonify({'error': 'no autenticado'}), 401
+    return jsonify(obtener_equipos())
 
 
-# =========================================================
-# Punto de entrada: solo se ejecuta cuando corrés
-# `python app.py` directamente. No se ejecuta cuando
-# lo levanta Gunicorn (el servidor de producción en Docker).
-# =========================================================
+@app.route('/health')
+def health():
+    """
+    Endpoint de diagnóstico: dice si la app llega a cada servicio.
+    Útil para probar la conectividad sin tocar la interfaz.
+    """
+    estado = {
+        'sql': get_sql_connection() is not None,
+        'mongo': get_mongo_collection() is not None,
+    }
+    return jsonify(estado)
+
+
 if __name__ == '__main__':
-    # debug=True hace que Flask se reinicie automáticamente
-    # cada vez que guardás un cambio en el código.
     app.run(debug=True, host='0.0.0.0', port=5000)
