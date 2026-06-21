@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: inventario
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: inventario-egi
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: SECRET_KEY
+              value: "cambiar-en-produccion"
+          envFrom:
+          - secretRef:
+              name: sqlserver-secret
+
