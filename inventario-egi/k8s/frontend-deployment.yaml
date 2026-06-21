@@ -16,13 +16,11 @@ spec:
       containers:
         - name: frontend
           image: inventario-egi
-          imagePullPolicy: Never
+          imagePullPolicy: Never        # imagen local de Minikube
           ports:
             - containerPort: 5000
-          env:
-            - name: SECRET_KEY
-              value: "cambiar-en-produccion"
           envFrom:
-          - secretRef:
-              name: sqlserver-secret
-
+            - configMapRef:
+                name: inventario-config   # variables no sensibles (hosts, puertos)
+            - secretRef:
+                name: sqlserver-secret    # variables sensibles (contraseñas)
