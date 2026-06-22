@@ -5,12 +5,12 @@
 {% block content %}
 <form method="POST" action="{{ url_for('nuevo_equipo') }}">
 <div class="row g-4">
-    <!-- Datos de Ubicación (van a MySQL) -->
+    <!-- Datos de Ubicación (van a SQL Server) -->
     <div class="col-md-6">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white fw-semibold">
                 <i class="bi bi-geo-alt me-2 text-primary"></i>Ubicación y Asignación
-                <span class="badge bg-info text-dark ms-2" style="font-size:.72rem;">→ MySQL</span>
+                <span class="badge bg-info text-dark ms-2" style="font-size:.72rem;">→ SQL Server</span>
             </div>
             <div class="card-body">
                 <div class="mb-3">
@@ -40,10 +40,20 @@
                     <label class="form-label">N° Banco / Mesa <span class="text-danger">*</span></label>
                     <input type="number" class="form-control" name="numero_banco" min="1" required>
                 </div>
+                <!-- FIX: dropdown con técnicos reales de la BD en vez de texto libre -->
                 <div class="mb-3">
-                    <label class="form-label">Responsable <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="responsable"
-                           placeholder="Ej: Lic. María López" required>
+                    <label class="form-label">Responsable técnico <span class="text-danger">*</span></label>
+                    <select class="form-select" name="responsable_id" required>
+                        <option value="">Seleccionar...</option>
+                        {% for t in tecnicos %}
+                        <option value="{{ t.id }}">{{ t.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if not tecnicos %}
+                    <div class="form-text text-danger">
+                        No se pudieron cargar los técnicos. Verificá la conexión a SQL.
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

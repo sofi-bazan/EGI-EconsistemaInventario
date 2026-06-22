@@ -1,0 +1,76 @@
+# =============================================================
+# deploy.yml
+# Pipeline de CI/CD para el Ecosistema de Inventario Seguro (EGI)
+#
+# Se ejecuta automáticamente cuando se hace push a 'develop'
+# o 'master'. Corre en el self-hosted runner de la VM Ubuntu
+# (donde está Minikube), por eso puede buildear la imagen
+# directamente en el Docker interno de Minikube.
+#
+# Pasos:
+#   1. Checkout del código
+#   2. Apuntar Docker al Minikube interno
+#   3. Build de la imagen inventario-egi
+#   4. Aplicar los manifiestos de Kubernetes
+#   5. Rollout restart del deployment
+#   6. Verificar que el pod quedó Running
+# =============================================================
+name: Deploy EGI Inventario
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+  workflow_dispatch:   # permite dispararlo manualmente desde GitHub
+
+jobs:
+  build-and-deploy:
+    name: Build y Deploy en Minikube
+    runs-on: self-hosted   # corre en tu VM Ubuntu
+
+    steps:
+      # 1. Traer el código del repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Apuntar Docker al Minikube interno y buildear la imagen
+      - name: Build imagen Docker en Minikube
+        working-directory: inventario-egi
+        run: |
+          # Apuntar al Docker de Minikube (equivalente a eval $(minikube docker-env))
+          export DOCKER_TLS_VERIFY="1"
+          export DOCKER_HOST="tcp://$(minikube ip):2376"
+          export DOCKER_CERT_PATH="$HOME/.minikube/certs"
+          export MINIKUBE_ACTIVE_DOCKERD="minikube"
+
+          echo "Docker host: $DOCKER_HOST"
+          docker build --no-cache -t inventario-egi .
+          echo "Imagen construida correctamente"
+
+      # 3. Aplicar los manifiestos de Kubernetes
+      - name: Aplicar manifiestos K8s
+        working-directory: inventario-egi
+        run: |
+          # Aplicar namespace primero, luego el resto
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/ --recursive
+          echo "Manifiestos aplicados"
+
+      # 4. Reiniciar el deployment para que tome la imagen nueva
+      - name: Rollout restart
+        run: |
+          kubectl rollout restart deployment/frontend -n inventario
+          echo "Rollout iniciado"
+
+      # 5. Esperar a que el pod esté Running (timeout 120s)
+      - name: Verificar deploy
+        run: |
+          kubectl rollout status deployment/frontend -n inventario --timeout=120s
+          echo ""
+          echo "=== Estado de pods ==="
+          kubectl get pods -n inventario
+          echo ""
+          echo "=== Health check ==="
+          sleep 5
+          curl -sf http://$(minikube ip):30500/health || echo "Health check pendiente (normal si SQL/Mongo tardan)"
