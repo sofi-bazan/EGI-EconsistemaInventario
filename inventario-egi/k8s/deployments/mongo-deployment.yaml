@@ -7,22 +7,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongo
+  name: mongodb
   namespace: inventario
   labels:
-    app: mongo                # etiqueta que usa el Service y las NetworkPolicies
+    app: mongodb                # etiqueta que usa el Service y las NetworkPolicies
 spec:
   replicas: 1                 # una sola instancia de Mongo
   selector:
     matchLabels:
-      app: mongo
+      app: mongodb
   template:
     metadata:
       labels:
-        app: mongo            # los pods llevan esta etiqueta (clave para el Service y las policies)
+        app: mongodb            # los pods llevan esta etiqueta (clave para el Service y las policies)
     spec:
       containers:
-        - name: mongo
+        - name: mongodb
           image: mongo:7.0    # imagen oficial de MongoDB
           ports:
             - containerPort: 27017   # puerto estandar de Mongo

@@ -1,0 +1,21 @@
+# =============================================================
+# configmaps/inventario-config.yaml
+# Variables de configuracion NO sensibles de la app.
+# Aplicar: kubectl apply -f kubernetes/configmaps/
+# =============================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventario-config
+  namespace: inventario
+data:
+  SQL_HOST: "ubicacion-db"
+  SQL_PORT: "1433"
+  SQL_DATABASE: "Inventario"
+  MONGO_HOST: "inventario-db"
+  MONGO_PORT: "27017"
+  MONGO_DB: "inventario"
+  MONGO_COLLECTION: "hardware"
+  LDAP_HOST: "ldap-service"
+  LDAP_PORT: "389"
+  LDAP_DOMAIN: "itu.local"

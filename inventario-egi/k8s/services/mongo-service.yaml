@@ -12,7 +12,7 @@ metadata:
 spec:
   type: ClusterIP            # solo accesible dentro del cluster (no al exterior)
   selector:
-    app: mongo               # apunta a los pods con la etiqueta app=mongo
+    app: mongodb               # apunta a los pods con la etiqueta app=mongo
   ports:
     - protocol: TCP
       port: 27017            # puerto del Service
