@@ -1,4 +1,4 @@
-# 🖥️ Ecosistema de Inventario Seguro — ITU
+# Ecosistema de Inventario Seguro — ITU
 
 Proyecto Integrador de la materia **EGI** (Instituto Tecnológico Universitario).  
 Sistema centralizado para inventariar las computadoras de los laboratorios de informática, con autenticación federada, firewall perimetral y despliegue en Kubernetes.
