@@ -1,8 +1,7 @@
 # =============================================================
-# app-config.yaml
-# ConfigMap (no sensible) + Secret (sensible) para la app.
-# El frontend-deployment.yaml ya hace envFrom: secretRef: sqlserver-secret,
-# se recomienda agregar tambien el configMapRef de abajo.
+# configmaps/inventario-config.yaml
+# Variables de configuracion NO sensibles de la app.
+# Aplicar: kubectl apply -f kubernetes/configmaps/
 # =============================================================
 apiVersion: v1
 kind: ConfigMap
@@ -20,16 +19,3 @@ data:
   LDAP_HOST: "ldap-service"
   LDAP_PORT: "389"
   LDAP_DOMAIN: "itu.local"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: sqlserver-secret
-  namespace: inventario
-type: Opaque
-stringData:
-  SECRET_KEY: "cambiar-esta-clave-por-una-larga-y-aleatoria"
-  SQL_USER: "sa"
-  SQL_PASSWORD: "TuPasswordFuerte123"
-  MONGO_USER: ""
-  MONGO_PASSWORD: ""
