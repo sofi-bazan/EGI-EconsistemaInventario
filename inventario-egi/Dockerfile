@@ -24,4 +24,4 @@ RUN useradd -m appuser
 USER appuser
 
 EXPOSE 5000
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "frontend.src.app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "--chdir", "backend/src", "app:app"]
