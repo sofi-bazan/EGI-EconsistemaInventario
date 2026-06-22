@@ -23,6 +23,8 @@ spec:
             - name: SECRET_KEY
               value: "cambiar-en-produccion"
           envFrom:
+          - configMapRef:
+              name: inventario-config
           - secretRef:
               name: sqlserver-secret
 
