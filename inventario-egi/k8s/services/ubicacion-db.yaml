@@ -31,7 +31,7 @@ subsets:
       # IP de la VM Windows donde corre SQL Server.
       # Descomentar la que corresponda a tu infraestructura:
       # ===========================================================
-      - ip: 192.168.1.10     # <-- Infraestructura A (SQL junto al AD)
-      # - ip: 192.168.1.20   # <-- Infraestructura B (SQL en VM dedicada)
+      # - ip: 192.168.1.10     # <-- Infraestructura A (SQL junto al AD)
+      - ip: 192.168.1.20   # <-- Infraestructura B (SQL en VM dedicada)
     ports:
       - port: 1433
