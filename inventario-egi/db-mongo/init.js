@@ -5,17 +5,11 @@
 // inserta los documentos desde seeds/hardware.json y
 // crea indices para optimizar las busquedas.
 //
-// Ejecutar dentro del pod de Mongo:
-//   mongosh "mongodb://localhost:27017/inventario" /docker-entrypoint-initdb.d/init.js
-// o desde la VM:
-//   mongosh "mongodb://inventario-db:27017/inventario" init.js
 // =========================================================
 
 const db = db.getSiblingDB("inventario");
 
 // ---------- Coleccion con validador flexible ----------
-// Solo exige equipo_id; el resto de campos es libre
-// para aprovechar la flexibilidad de Mongo.
 db.createCollection("hardware", {
   validator: {
     $jsonSchema: {
@@ -30,15 +24,11 @@ db.createCollection("hardware", {
 });
 
 // ---------- Indices ----------
-// equipo_id: busqueda principal (puente SQL <-> Mongo)
 db.hardware.createIndex({ equipo_id: 1 }, { unique: true });
 // tipo: filtrado frecuente (desktop / laptop / servidor)
 db.hardware.createIndex({ tipo: 1 });
 
 // ---------- Datos iniciales (seeds/hardware.json) ----------
-// Los 12 documentos se insertan con la estructura variada
-// que pide la consigna (laptops tienen bateria_salud_pct,
-// servidores tienen rol, algunos tienen gpu, etc.)
 const docs = [
   { equipo_id:"PC-0001", tipo:"desktop", fabricante:"Lenovo",
     modelo:"ThinkCentre M75q", cpu:"AMD Ryzen 5 PRO 4650GE @ 3.3GHz",

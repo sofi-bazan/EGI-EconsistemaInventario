@@ -1,8 +1,5 @@
 # =============================================================
 # mongo-pvc.yaml
-# PersistentVolumeClaim: el "disco" donde MongoDB guarda los datos.
-# Gracias a esto, los datos persisten aunque el pod se reinicie o recree.
-# Proyecto Integrador EGI - ITU
 # =============================================================
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -11,7 +8,7 @@ metadata:
   namespace: inventario
 spec:
   accessModes:
-    - ReadWriteOnce          # un solo nodo escribe (suficiente para Minikube)
+    - ReadWriteOnce          # un solo nodo escribe
   resources:
     requests:
-      storage: 1Gi           # 1 GB para los datos de inventario (de sobra)
+      storage: 1Gi           # 1 GB para datos de inventario

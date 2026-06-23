@@ -1,9 +1,5 @@
 # =============================================================
-# Dockerfile - App web Flask (Inventario ITU)
-# =============================================================
-# pymssql trae sus binarios (FreeTDS) en la wheel, asi que NO
-# hace falta instalar el driver ODBC de Microsoft. La imagen
-# queda mas liviana que con msodbcsql18.
+# Dockerfile - App web Flask
 # =============================================================
 FROM python:3.11-slim
 
@@ -19,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Usuario no-root (buena practica de seguridad)
+# Usuario no-root
 RUN useradd -m appuser
 USER appuser
 

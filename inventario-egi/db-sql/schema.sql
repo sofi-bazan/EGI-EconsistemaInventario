@@ -1,17 +1,8 @@
 -- =============================================================
 -- schema.sql
--- Base de datos SQL Server: Inventario
--- Proyecto Integrador EGI - ITU
--- =============================================================
--- Ejecutar ANTES que seed-data.sql
--- Desde SSMS: abrir este archivo y ejecutar (F5)
--- Desde linea de comandos:
---   sqlcmd -S localhost\ITULAB -i schema.sql
+-- Base de datos SQL Server
 -- =============================================================
 
--- -------------------------------------------------------------
--- Crear la base de datos si no existe
--- -------------------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'Inventario')
 BEGIN
     CREATE DATABASE Inventario;
@@ -23,8 +14,6 @@ GO
 
 -- -------------------------------------------------------------
 -- Tabla: ubicacion
--- Registra los espacios fisicos donde se ubican los equipos.
--- Una ubicacion = un laboratorio en un edificio y aula.
 -- -------------------------------------------------------------
 CREATE TABLE ubicacion (
     id                  INT           NOT NULL IDENTITY(1,1),
@@ -38,10 +27,6 @@ GO
 
 -- -------------------------------------------------------------
 -- Tabla: responsable
--- Personas del sistema: tecnicos (fijos), docentes y alumnos
--- (que pueden tener equipos asignados temporalmente).
--- El campo "tipo" distingue los tres roles del enunciado.
--- SQL Server no tiene ENUM: se usa CHECK para restringir valores.
 -- -------------------------------------------------------------
 CREATE TABLE responsable (
     id          INT           NOT NULL IDENTITY(1,1),
@@ -60,12 +45,7 @@ CREATE TABLE responsable (
 GO
 
 -- -------------------------------------------------------------
--- Tabla: equipo  <- TABLA CENTRAL
--- equipo_id es el ID compartido con MongoDB (_id en Mongo).
--- Responde: donde esta el equipo? quien es el responsable fijo?
--- La FK responsable_id apunta siempre a un tecnico permanente.
--- Las asignaciones temporales a docentes/alumnos estan en
--- la tabla asignaciones_temporales (ver abajo).
+-- Tabla: equipo
 -- -------------------------------------------------------------
 CREATE TABLE equipo (
     equipo_id                   VARCHAR(20)   NOT NULL,
@@ -95,11 +75,6 @@ GO
 
 -- -------------------------------------------------------------
 -- Tabla: asignaciones_temporales
--- El enunciado indica que "alumnos o docentes tienen equipos
--- asignados temporalmente". Esta tabla registra esas asignaciones
--- separadas del responsable tecnico fijo del equipo.
--- Permite historial: un equipo puede haber tenido multiples
--- asignaciones temporales a lo largo del tiempo.
 -- -------------------------------------------------------------
 CREATE TABLE asignaciones_temporales (
     id                  INT           NOT NULL IDENTITY(1,1),
@@ -125,9 +100,6 @@ GO
 
 -- -------------------------------------------------------------
 -- Tabla: mantenimiento
--- Historial de mantenimientos preventivos y correctivos.
--- tecnico_id apunta a un responsable de tipo 'tecnico'.
--- fecha_fin NULL significa que el mantenimiento esta en curso.
 -- -------------------------------------------------------------
 CREATE TABLE mantenimiento (
     id           INT            NOT NULL IDENTITY(1,1),

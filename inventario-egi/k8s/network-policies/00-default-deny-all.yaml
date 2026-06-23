@@ -1,0 +1,14 @@
+# =============================================================
+# 00-default-deny-all.yaml
+# Política base: niega TODO el tráfico ingress y egress por defecto.
+# =============================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: inventario
+spec:
+  podSelector: {}       # aplica a TODOS los pods del namespace
+  policyTypes:
+    - Ingress
+    - Egress

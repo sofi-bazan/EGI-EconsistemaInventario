@@ -1,12 +1,6 @@
 # =============================================================
 # ubicacion-db.yaml
 # Service + Endpoints hacia SQL Server (FUERA del clúster).
-#
-# SQL Server corre en la VM Windows, no como pod. Por eso se usa
-# un "Service sin selector" + "Endpoints" manuales: Kubernetes
-# le da el nombre interno "ubicacion-db" y redirige el tráfico
-# a la IP de la VM Windows. Flask se conecta a "ubicacion-db:1433"
-# sin saber que en realidad está afuera.
 # =============================================================
 apiVersion: v1
 kind: Service
@@ -23,7 +17,7 @@ spec:
 apiVersion: v1
 kind: Endpoints
 metadata:
-  name: ubicacion-db        # mismo nombre que el Service (los vincula)
+  name: ubicacion-db        # mismo nombre que el Service
   namespace: inventario
 subsets:
   - addresses:

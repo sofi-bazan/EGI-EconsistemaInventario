@@ -5,7 +5,7 @@
 {% block content %}
 <form method="POST" action="{{ url_for('nuevo_equipo') }}">
 <div class="row g-4">
-    <!-- Datos de Ubicación (van a SQL Server) -->
+    <!-- Datos de Ubicación (SQL Server) -->
     <div class="col-md-6">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white fw-semibold">
@@ -40,7 +40,7 @@
                     <label class="form-label">N° Banco / Mesa <span class="text-danger">*</span></label>
                     <input type="number" class="form-control" name="numero_banco" min="1" required>
                 </div>
-                <!-- FIX: dropdown con técnicos reales de la BD en vez de texto libre -->
+
                 <div class="mb-3">
                     <label class="form-label">Responsable técnico <span class="text-danger">*</span></label>
                     <select class="form-select" name="responsable_id" required>
@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <!-- Datos de Hardware (van a MongoDB) -->
+    <!-- Datos de Hardware (MongoDB) -->
     <div class="col-md-6">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white fw-semibold">

@@ -5,7 +5,7 @@ Sistema centralizado para inventariar las computadoras de los laboratorios de in
 
 ---
 
-## 📋 Descripción del Proyecto
+## Descripción del Proyecto
 
 La aplicación permite consultar **dónde está** cada equipo y **qué tiene adentro**:
 
@@ -17,7 +17,7 @@ La aplicación permite consultar **dónde está** cada equipo y **qué tiene ade
 
 ---
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 ```
 [Usuario]

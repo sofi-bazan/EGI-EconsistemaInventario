@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row g-4">
 
-    <!-- Columna izquierda: datos de ubicación y asignación (vienen de MySQL) -->
+    <!-- Columna izquierda: datos de ubicación y asignación (MySQL) -->
     <div class="col-md-6">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white d-flex align-items-center">
@@ -18,7 +18,6 @@
                 <table class="table table-sm table-borderless">
                     <tr>
                         <td class="text-muted" style="width:45%">N° de Serie</td>
-                        <!-- badge-serie en lugar de <code> -->
                         <td><span class="badge-serie">{{ equipo.numero_serie }}</span></td>
                     </tr>
                     <tr>
@@ -60,7 +59,7 @@
         </div>
     </div>
 
-    <!-- Columna derecha: componentes de hardware (vienen de MongoDB) -->
+    <!-- Columna derecha: componentes de hardware (MongoDB) -->
     <div class="col-md-6">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white d-flex align-items-center">
@@ -131,7 +130,7 @@
         <i class="bi bi-arrow-left me-1"></i>Volver al inventario
     </a>
     {% if equipo %}
-    <!-- data-confirm: el JS en main.js lee este atributo para mostrar el confirm() -->
+
     <form method="POST"
           action="{{ url_for('eliminar_equipo', equipo_id=equipo.id) }}"
           class="d-inline"

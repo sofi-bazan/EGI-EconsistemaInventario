@@ -1,8 +1,5 @@
 # =============================================================
 # configmap.yaml
-# Variables de entorno NO sensibles para la app Flask.
-# (hosts, puertos, nombres de base). Las contraseñas van
-# aparte, en el Secret (nunca en el ConfigMap).
 # =============================================================
 apiVersion: v1
 kind: ConfigMap
@@ -11,16 +8,16 @@ metadata:
   namespace: inventario
 data:
   # --- SQL Server ---
-  SQL_HOST: "ubicacion-db"      # nombre del Service interno (no IP)
+  SQL_HOST: "ubicacion-db" 
   SQL_PORT: "1433"
   SQL_USER: "sa"
   SQL_DATABASE: "Inventario"
   # --- MongoDB ---
-  MONGO_HOST: "inventario-db"   # nombre del Service interno de Mongo
+  MONGO_HOST: "inventario-db" 
   MONGO_PORT: "27017"
   MONGO_DB: "inventario"
   MONGO_COLLECTION: "hardware"
   # --- LDAP / Active Directory ---
-  LDAP_HOST: "ldap-service"     # nombre del Service interno
+  LDAP_HOST: "ldap-service"
   LDAP_PORT: "389"
   LDAP_DOMAIN: "itu.local"

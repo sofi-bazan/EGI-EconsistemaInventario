@@ -1,18 +1,12 @@
 # =========================================================
 # Inventario ITU - app.py
 #
-# App web Flask (templates Jinja2) del Ecosistema de Inventario Seguro.
+# App web Flask (templates Jinja2)
 # Se conecta a:
 #   - SQL Server (ubicacion + propietarios) -> pymssql
 #   - MongoDB    (hardware de equipos)      -> pymongo
 #   - LDAP / AD  (autenticacion)            -> ldap3
 #
-# Puente entre SQL y Mongo: el campo equipo_id (ej: 'PC-0001').
-# En SQL es la PK (VARCHAR). En Mongo es el campo equipo_id de cada
-# documento. Mismo valor en ambos lados = se cruzan los datos.
-#
-# Toda la config (hosts, puertos, credenciales) viene de variables
-# de entorno. Nada hardcodeado.
 # =========================================================
 
 import os
@@ -122,10 +116,6 @@ def _proximo_equipo_id(conn):
         siguiente = 1
     return f"PC-{siguiente:04d}"
 
-
-# =========================================================
-# FIX: obtener lista de tecnicos para el dropdown
-# =========================================================
 def obtener_tecnicos():
     """
     Devuelve lista de tecnicos activos para el dropdown del formulario.
@@ -344,7 +334,6 @@ def nuevo_equipo():
         return render_template('nuevo_equipo.html',
                                aulas=aulas, tecnicos=tecnicos)
 
-    # ----------------- POST: alta real -----------------
     numero_serie  = request.form.get('numero_serie', '').strip()
     tipo          = request.form.get('tipo', 'desktop').strip()
     aula_id       = request.form.get('aula_id', '').strip()
@@ -367,7 +356,6 @@ def nuevo_equipo():
         cursor = conn.cursor()
 
         # FIX: usar el ID del dropdown directamente.
-        # Si por alguna razon llega vacio, usar el primer tecnico activo.
         if responsable_id_form:
             responsable_id = int(responsable_id_form)
         else:
@@ -377,7 +365,6 @@ def nuevo_equipo():
             fila = cursor.fetchone()
             responsable_id = fila[0] if fila else 1
 
-        # Generar equipo_id PC-XXXX (puente con Mongo)
         nuevo_id = _proximo_equipo_id(conn)
 
         # INSERT en SQL
@@ -402,7 +389,7 @@ def nuevo_equipo():
         if conn:
             conn.close()
 
-    # INSERT del hardware en Mongo (mismo equipo_id)
+    # INSERT del hardware en Mongo
     coleccion = get_mongo_collection()
     if coleccion is not None and nuevo_id:
         try:
@@ -441,7 +428,6 @@ def eliminar_equipo(equipo_id):
         try:
             cursor = conn.cursor()
             # FIX: borrar primero las tablas dependientes para evitar
-            # el error de FK constraint al eliminar el equipo.
             cursor.execute(
                 "DELETE FROM asignaciones_temporales WHERE equipo_id = %s",
                 (equipo_id,))

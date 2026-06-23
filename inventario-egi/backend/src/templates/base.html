@@ -15,9 +15,6 @@
 
     <!-- =====================================================
          SIDEBAR DESKTOP
-         d-none d-md-flex = invisible en mobile, visible
-         a partir de pantallas medianas (768px+).
-         En desktop ocupa 230px fijos al costado izquierdo.
     ====================================================== -->
     <nav class="sidebar d-none d-md-flex flex-column" style="width:230px; flex-shrink:0; min-height:100vh;">
         <div class="text-center py-3 px-2 mb-2">
@@ -53,9 +50,6 @@
 
     <!-- =====================================================
          SIDEBAR MOBILE (Offcanvas)
-         El mismo menú pero en versión deslizable.
-         Se activa con el botón hamburguesa de la topbar.
-         data-bs-target apunta al id del offcanvas de abajo.
     ====================================================== -->
     <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMobile"
          style="width:230px; background:var(--itu-primary);">
@@ -96,13 +90,13 @@
         </div>
     </div>
 
-    <!-- Columna derecha: topbar + contenido + footer -->
+    <!-- Columna derecha -->
     <div class="flex-grow-1 d-flex flex-column" style="min-width:0;">
 
         <!-- Topbar -->
         <div class="d-flex align-items-center px-3 py-2 bg-white shadow-sm">
 
-            <!-- Botón hamburguesa: solo visible en mobile (d-md-none) -->
+            <!-- Botón hamburguesa (mobile) -->
             <button class="btn btn-sm btn-outline-secondary me-2 d-md-none"
                     type="button"
                     data-bs-toggle="offcanvas"
@@ -114,7 +108,6 @@
                 {% block page_title %}Panel{% endblock %}
             </h5>
 
-            <!-- El nombre de usuario se oculta en mobile para no apretar la topbar -->
             <span class="ms-auto text-muted d-none d-sm-inline" style="font-size:.82rem; white-space:nowrap;">
                 <i class="bi bi-shield-check text-success me-1"></i>
                 <strong>{{ session.username }}</strong>

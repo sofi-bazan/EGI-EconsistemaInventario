@@ -2,10 +2,6 @@
 # ldap-service.yaml
 # Service + Endpoints hacia Active Directory / LDAP (FUERA del clúster).
 #
-# El AD corre en la VM Windows (192.168.1.10). Igual que con SQL,
-# se usa Service sin selector + Endpoints para darle el nombre
-# interno "ldap-service". Flask autentica contra "ldap-service:389".
-#
 # Nota: la IP del AD es 192.168.1.10 en AMBAS infraestructuras (A y B).
 # =============================================================
 apiVersion: v1

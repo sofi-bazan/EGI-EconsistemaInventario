@@ -1,21 +1,10 @@
 -- =============================================================
 -- seed-data.sql
--- Datos de ejemplo (12 filas por tabla)
--- Proyecto Integrador EGI - ITU
--- =============================================================
--- Ejecutar DESPUES de schema.sql
--- Desde SSMS: abrir este archivo y ejecutar (F5)
--- Desde linea de comandos:
---   sqlcmd -S localhost\ITULAB -i seed-data.sql
+-- Datos de ejemplo
 -- =============================================================
 
 USE Inventario;
 GO
-
--- Orden de carga respetando dependencias de FK:
---   1) ubicacion y responsable (catalogos, sin dependencias)
---   2) equipo (depende de ubicacion y responsable)
---   3) asignaciones_temporales, mantenimiento (dependen de equipo)
 
 -- -------------------------------------------------------------
 -- Limpieza opcional para poder re-ejecutar el seed.
@@ -29,8 +18,7 @@ DELETE FROM ubicacion;
 GO
 
 -- -------------------------------------------------------------
--- 1) ubicacion  (12 espacios fisicos)
--- IDENTITY_INSERT ON permite insertar los id explicitamente.
+-- 1) ubicacion 
 -- -------------------------------------------------------------
 SET IDENTITY_INSERT ubicacion ON;
 INSERT INTO ubicacion (id, edificio, aula, capacidad_equipos) VALUES
@@ -50,7 +38,7 @@ SET IDENTITY_INSERT ubicacion OFF;
 GO
 
 -- -------------------------------------------------------------
--- 2) responsable  (12 personas: tecnicos, docentes y alumnos)
+-- 2) responsable 
 -- -------------------------------------------------------------
 SET IDENTITY_INSERT responsable ON;
 INSERT INTO responsable (id, nombre, apellido, tipo, email, legajo, telefono, activo) VALUES
@@ -70,10 +58,7 @@ SET IDENTITY_INSERT responsable OFF;
 GO
 
 -- -------------------------------------------------------------
--- 3) equipo  (12 equipos)
--- equipo_id es el ID compartido con MongoDB (PC-0001 = _id en Mongo).
--- responsable_id apunta siempre a un tecnico (ids 1..4).
--- equipo_id no es IDENTITY (es VARCHAR), no necesita IDENTITY_INSERT.
+-- 3) equipo 
 -- -------------------------------------------------------------
 INSERT INTO equipo
     (equipo_id, numero_serie, numero_banco, ubicacion_id, responsable_id,
@@ -93,9 +78,7 @@ INSERT INTO equipo
 GO
 
 -- -------------------------------------------------------------
--- 4) asignaciones_temporales  (12 asignaciones a docentes/alumnos)
--- responsable_id apunta a docentes (5..8) o alumnos (9..12).
--- estado: activa (sin devolucion), finalizada (devuelta), vencida.
+-- 4) asignaciones_temporales
 -- -------------------------------------------------------------
 SET IDENTITY_INSERT asignaciones_temporales ON;
 INSERT INTO asignaciones_temporales
@@ -116,9 +99,7 @@ SET IDENTITY_INSERT asignaciones_temporales OFF;
 GO
 
 -- -------------------------------------------------------------
--- 5) mantenimiento  (12 registros de mantenimiento)
--- tecnico_id apunta a un responsable de tipo 'tecnico' (1..4).
--- fecha_fin NULL = mantenimiento en curso.
+-- 5) mantenimiento
 -- -------------------------------------------------------------
 SET IDENTITY_INSERT mantenimiento ON;
 INSERT INTO mantenimiento

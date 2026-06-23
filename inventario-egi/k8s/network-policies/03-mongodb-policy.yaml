@@ -1,0 +1,25 @@
+# =============================================================
+# 03-mongodb-policy.yaml
+# Políticas para el pod MongoDB (app: mongodb).
+# =============================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongodb-policy
+  namespace: inventario
+spec:
+  podSelector:
+    matchLabels:
+      app: mongodb
+  policyTypes:
+    - Ingress
+
+  ingress:
+    # Solo el pod Flask puede consultar MongoDB
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - protocol: TCP
+          port: 27017

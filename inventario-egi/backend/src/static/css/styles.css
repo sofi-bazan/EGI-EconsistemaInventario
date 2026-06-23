@@ -1,13 +1,11 @@
 /* =========================================================
    Inventario ITU — Estilos globales
-   Paleta institucional definida como variables CSS para
-   poder cambiar colores en un solo lugar si hace falta.
    ========================================================= */
 
 :root {
-    --itu-primary: #1a3a5c;   /* azul marino institucional */
-    --itu-accent:  #2e8bc0;   /* azul claro para botones y acentos */
-    --itu-light:   #e8f4fd;   /* fondo suave para badges y highlights */
+    --itu-primary: #1a3a5c;   
+    --itu-accent:  #2e8bc0;   
+    --itu-light:   #e8f4fd;   
 }
 
 /* ----- Layout general ----- */
@@ -76,9 +74,7 @@ table thead {
     color: #fff;
 }
 
-/* ----- Botones — sobreescribimos el azul de Bootstrap
-         para que use el color institucional en lugar del
-         azul por defecto de Bootstrap                  ----- */
+/* ----- Botones ----- */
 .btn-primary {
     background: var(--itu-accent);
     border-color: var(--itu-accent);
@@ -89,7 +85,7 @@ table thead {
     border-color: var(--itu-primary);
 }
 
-/* ----- Número de serie en tabla (antes era <code> inline) ----- */
+/* ----- Número de serie en tabla ----- */
 .badge-serie {
     font-size: .82rem;
     background: #f0f4fa;
@@ -108,27 +104,19 @@ footer {
 }
 
 /* =========================================================
-   RESPONSIVE — ajustes para pantallas chicas
-   @media es una condición que dice "aplicá estos estilos
-   SOLO cuando el ancho de pantalla sea menor a 768px".
-   Los estilos de arriba siguen aplicando en desktop.
+   RESPONSIVE 
    ========================================================= */
 
 @media (max-width: 768px) {
 
-    /* Menos padding lateral en mobile para aprovechar el espacio */
     .main-content {
         padding: 1rem;
     }
 
-    /* En mobile las tarjetas de stats del dashboard
-       ocupan la mitad del ancho cada una (2 por fila) */
     .card-stat {
         min-width: 0;
     }
 
-    /* El footer se centra en mobile en lugar de quedar
-       en dos columnas que se aprietan */
     footer {
         justify-content: center !important;
         text-align: center;
